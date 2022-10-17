@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-from dis import dis
 import platform
 import os
 import psutil
