@@ -16,8 +16,9 @@ cpu_info = os.popen(cpu_unix_command).read().split('\n')
 
 gpus = ""
 
-for i in result:
-    gpus += str(i.split(":")[2]).split('(')[0]
+for num,i in enumerate(result):
+        gpus += f"GPU {num}:" + str(i.split(":")[2])
+        gpus += "        "
 
 os_name = platform.node()
 kernel = platform.release()
@@ -33,8 +34,7 @@ fetch = f"""        OS: {os_name}
         Kernel: {kernel}
         DE: {os.environ.get("DESKTOP_SESSION")}
         CPU: {cpu_info[0].split(':')[1]}
-        GPU: {gpus}
-        Disk: {round(disk_info.used/(1028**3))} GiB / {round(disk_info.total/(1028*1028*1028))} GiB
+        {gpus}Disk: {round(disk_info.used/(1028**3))} GiB / {round(disk_info.total/(1028*1028*1028))} GiB
         Memory: {memory['used']} MiB / {memory['total']} MiB"""
 
 print(fetch)
