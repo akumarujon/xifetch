@@ -3,7 +3,11 @@
 import platform
 import os
 import psutil
+import math
 
+si_prefix=['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+base=1024
+digit_after_point=2
 
 # gpu info
 gpu_unix_command = "lspci | grep VGA"
@@ -23,19 +27,27 @@ for num,i in enumerate(result):
 os_name = platform.node()
 kernel = platform.release()
 
+total=psutil.virtual_memory().total
+total_class=min(int(math.log(total, base)), len(si_prefix) - 1)
+
+free=psutil.virtual_memory().free
+free_class=min(int(math.log(free, base)), len(si_prefix) - 1)
+
+used=psutil.virtual_memory().used
+used_class=min(int(math.log(used, base)), len(si_prefix) - 1)
 
 memory = {
-        'total':round(psutil.virtual_memory().total/(1024*1024)),
-        'free':round(psutil.virtual_memory().free/(1024*1024)),
-        'used':round(psutil.virtual_memory().used/(1024*1024)),
+        'total':round(total / pow(base, total_class), digit_after_point),
+        'free':round(free / pow(base, free_class), digit_after_point),
+        'used':round(used / pow(base, used_class), digit_after_point),
 }
 
 fetch = f"""        OS: {os_name}
         Kernel: {kernel}
         DE: {os.environ.get("DESKTOP_SESSION")}
         CPU: {cpu_info[0].split(':')[1]}
-        {gpus}Disk: {round(disk_info.used/(1028**3))} GiB / {round(disk_info.total/(1028*1028*1028))} GiB
-        Memory: {memory['used']} MiB / {memory['total']} MiB"""
+        {gpus}Disk: {round(disk_info.used/(1028**3))} {si_prefix[used_class]} / {round(disk_info.total/(1028*1028*1028))} {si_prefix[total_class]}
+        Memory: {memory['used']} {si_prefix[used_class]} / {memory['total']} {si_prefix[total_class]}"""
 
 print(fetch)
 
